@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPFS Test Page</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 4px;
+      cursor: pointer;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 16px;
+      border-radius: 8px;
+      overflow: auto;
+    }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>OPFS Test Page</h1>
+  <p>This page is used for testing OPFS operations.</p>
+
+  <div>
+    <button id="setup">Setup Test Data</button>
+    <button id="cleanup">Cleanup</button>
+    <button id="list">List Root</button>
+  </div>
+
+  <pre id="output"></pre>
+
+  <script>
+    const output = document.getElementById('output');
+
+    function log(msg, isError = false) {
+      const line = document.createElement('div');
+      line.className = isError ? 'error' : 'success';
+      line.textContent = typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2);
+      output.appendChild(line);
+    }
+
+    async function getDirectoryHandle(root, path, create = false) {
+      if (path === '/' || path === '') return root;
+      const parts = path.split('/').filter(p => p.length > 0);
+      let current = root;
+      for (const part of parts) {
+        current = await current.getDirectoryHandle(part, { create });
+      }
+      return current;
+    }
+
+    async function getFileHandle(root, path, create = false) {
+      const parts = path.split('/').filter(p => p.length > 0);
+      if (parts.length === 0) throw new Error('Invalid file path');
+      let current = root;
+      for (let i = 0; i < parts.length - 1; i++) {
+        current = await current.getDirectoryHandle(parts[i], { create });
+      }
+      return await current.getFileHandle(parts[parts.length - 1], { create });
+    }
+
+    async function writeFile(root, path, content) {
+      const handle = await getFileHandle(root, path, true);
+      const writable = await handle.createWritable();
+      await writable.write(content);
+      await writable.close();
+    }
+
+    // Create a simple PNG image (1x1 blue pixel)
+    function createTestPng() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 100;
+      canvas.height = 100;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#0071e3';
+      ctx.fillRect(0, 0, 100, 100);
+      return new Promise(resolve => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+    }
+
+    document.getElementById('setup').addEventListener('click', async () => {
+      output.innerHTML = '';
+      try {
+        const root = await navigator.storage.getDirectory();
+
+        // Create directories
+        await getDirectoryHandle(root, '/images', true);
+        await getDirectoryHandle(root, '/notes', true);
+        await getDirectoryHandle(root, '/data', true);
+        log('Created directories: /images, /notes, /data');
+
+        // Create test image
+        const pngBlob = await createTestPng();
+        await writeFile(root, '/images/a.png', pngBlob);
+        log('Created /images/a.png');
+
+        // Create test text file
+        await writeFile(root, '/notes/hello.txt', 'Hello, OPFS!');
+        log('Created /notes/hello.txt');
+
+        // Create test JSON file
+        await writeFile(root, '/data/sample.json', JSON.stringify({ test: true, count: 42 }, null, 2));
+        log('Created /data/sample.json');
+
+        log('Setup complete!');
+      } catch (e) {
+        log('Error: ' + e.message, true);
+      }
+    });
+
+    document.getElementById('cleanup').addEventListener('click', async () => {
+      output.innerHTML = '';
+      try {
+        const root = await navigator.storage.getDirectory();
+
+        for await (const [name] of root.entries()) {
+          await root.removeEntry(name, { recursive: true });
+          log('Deleted: ' + name);
+        }
+
+        log('Cleanup complete!');
+      } catch (e) {
+        log('Error: ' + e.message, true);
+      }
+    });
+
+    document.getElementById('list').addEventListener('click', async () => {
+      output.innerHTML = '';
+      try {
+        const root = await navigator.storage.getDirectory();
+
+        async function listDir(dir, path = '/') {
+          const entries = [];
+          for await (const [name, handle] of dir.entries()) {
+            const entryPath = path === '/' ? '/' + name : path + '/' + name;
+            const entry = { name, kind: handle.kind, path: entryPath };
+
+            if (handle.kind === 'file') {
+              const file = await handle.getFile();
+              entry.size = file.size;
+            } else {
+              entry.children = await listDir(handle, entryPath);
+            }
+
+            entries.push(entry);
+          }
+          return entries;
+        }
+
+        const tree = await listDir(root);
+        log(tree);
+      } catch (e) {
+        log('Error: ' + e.message, true);
+      }
+    });
+  </script>
+</body>
+</html>

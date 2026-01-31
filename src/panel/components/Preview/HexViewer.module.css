@@ -1,0 +1,63 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  font-size: 11px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.line {
+  display: flex;
+  line-height: 1.6;
+}
+
+.line:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.offset,
+.offsetHeader {
+  width: 80px;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.hex,
+.hexHeader {
+  width: 380px;
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+}
+
+.ascii,
+.asciiHeader {
+  width: 140px;
+  color: var(--color-accent);
+}
+
+.footer {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
+  color: var(--color-text-tertiary);
+  font-size: 10px;
+  text-align: center;
+}
