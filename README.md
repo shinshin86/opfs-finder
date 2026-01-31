@@ -10,6 +10,8 @@ An eerie logo for a practical purpose: a Chrome DevTools extension to quickly in
 
 ## Features
 
+![OPFS Finder - Demo](./assets/demo/demo.gif)
+
 - **3-Pane Finder-like UI**: Sidebar, file list, and preview panel
 - **File Operations**: Create, read, update, delete, copy, move, rename, duplicate
 - **Text Editing**: CodeMirror 6 with syntax highlighting, save with Cmd+S
@@ -86,7 +88,7 @@ npm run build
 | `npm run dev` | Build in watch mode |
 | `npm run build` | Production build |
 | `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
+| `npm run fmt` | Format code with Prettier |
 | `npm test` | Run unit tests |
 | `npm run test:e2e` | Run Playwright tests |
 
