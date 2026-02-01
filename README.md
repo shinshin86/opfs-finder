@@ -4,13 +4,13 @@
 
 Chrome DevTools extension for browsing and managing the Origin Private File System (OPFS) with a Finder-like UI.
 
-![OPFS Finders](./assets/logo/opfs-finders.png)
+![OPFS Finder - Demo](./assets/demo/demo.gif)
 
 An eerie logo for a practical purpose: a Chrome DevTools extension to quickly inspect and manage OPFS with an intuitive UI.
 
 ## Features
 
-![OPFS Finder - Demo](./assets/demo/demo.gif)
+![OPFS Finders](./assets/logo/opfs-finders.png)
 
 - **3-Pane Finder-like UI**: Sidebar, file list, and preview panel
 - **File Operations**: Create, read, update, delete, copy, move, rename, duplicate
